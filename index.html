@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Global Todo App – organise your tasks with notes, priorities, due dates and categories, in 8 languages." />
+  <meta name="theme-color" content="#0F766E" />
+  <title>Global TODO APP</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230F766E'/%3E%3Cg fill='none' stroke='white' stroke-width='2.2'%3E%3Ccircle cx='18' cy='18' r='10'/%3E%3Cellipse cx='18' cy='18' rx='4.4' ry='10'/%3E%3Cpath d='M8 18h20'/%3E%3C/g%3E%3Ccircle cx='29' cy='29' r='7.5' fill='white'/%3E%3Cpath d='M25.6 29.2l2.3 2.3 4.3-4.6' fill='none' stroke='%230F766E' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    // Apply saved theme + language direction before the page paints (avoids a flash).
+    (function () {
+      var root = document.documentElement, theme = null, lang = null;
+      try { theme = localStorage.getItem('globalTodo.theme'); lang = localStorage.getItem('globalTodo.lang'); } catch (e) {}
+      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) root.setAttribute('data-theme', 'dark');
+      if (!lang) {
+        var prefs = navigator.languages || [navigator.language || 'en'];
+        for (var i = 0; i < prefs.length && !lang; i++) {
+          var p = String(prefs[i]).toLowerCase().slice(0, 2);
+          if (['en', 'fr', 'es', 'zh', 'ru', 'pt', 'de', 'ar'].indexOf(p) > -1) lang = p;
+        }
+      }
+      if (lang === 'ar') root.setAttribute('dir', 'rtl');
+    })();
+  </script>
+</head>
+<body>
+  <!-- Icon sprite (used with <svg><use href="#i-name"/></svg>) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2M12 20.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1.5 12h2M20.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.6-4.6"/></symbol>
+      <symbol id="i-sort" viewBox="0 0 24 24"><path d="M3 6h11M3 12h8M3 18h5M18 5v14M15 16l3 3 3-3"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1"/></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></symbol>
+      <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/></symbol>
+      <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 7.5v5.5M12 16.5v.01"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 11v5.5M12 7.5v.01"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <!-- Logo mark: a globe with a checkmark -->
+        <svg class="logo" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+          <rect width="40" height="40" rx="11" class="logo-tile"/>
+          <g class="logo-globe">
+            <circle cx="18" cy="18" r="10"/>
+            <ellipse cx="18" cy="18" rx="4.4" ry="10"/>
+            <path d="M8 18h20M9.6 13h16.8M9.6 23h16.8"/>
+          </g>
+          <circle cx="29" cy="29" r="7.5" class="logo-badge"/>
+          <path d="M25.6 29.2l2.3 2.3 4.3-4.6" class="logo-check"/>
+        </svg>
+        <div class="brand-text">
+          <h1>Global Todo App</h1>
+          <p class="subtitle" id="today"></p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Language picker -->
+        <div class="lang" id="lang">
+          <button type="button" class="hbtn has-tip" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="langList" data-i18n-tip="lang_tip">
+            <span class="lang-flag" id="langFlag"></span>
+            <span class="lang-current" id="langName"></span>
+            <svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+          </button>
+          <ul class="menu lang-list" id="langList" role="listbox" tabindex="-1" hidden></ul>
+        </div>
+
+        <!-- Settings (mobile only; on desktop the tools are shown inline) -->
+        <button type="button" class="hbtn settings-btn has-tip" id="settingsBtn" aria-expanded="false" aria-controls="toolsMenu" data-i18n-tip="settings_tip">
+          <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
+          <span data-i18n="settings">Settings</span>
+          <svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </button>
+
+        <div class="tools" id="toolsMenu">
+          <button type="button" class="hbtn tool has-tip" id="themeToggle">
+            <svg class="icon" aria-hidden="true"><use id="themeIcon" href="#i-moon"/></svg>
+            <span class="tool-text"><span class="tool-label" id="themeLabel">Dark mode</span><span class="tool-desc" id="themeDesc"></span></span>
+          </button>
+          <button type="button" class="hbtn tool has-tip" id="exportBtn" data-i18n-tip="export_tip">
+            <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+            <span class="tool-text"><span class="tool-label" data-i18n="export">Export backup</span><span class="tool-desc" data-i18n="export_tip"></span></span>
+          </button>
+          <button type="button" class="hbtn tool has-tip" id="importBtn" data-i18n-tip="import_tip">
+            <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
+            <span class="tool-text"><span class="tool-label" data-i18n="import">Import backup</span><span class="tool-desc" data-i18n="import_tip"></span></span>
+          </button>
+        </div>
+        <input type="file" id="importInput" accept="application/json,.json" hidden />
+      </div>
+    </div>
+
+    <!-- Stats + progress -->
+    <section class="stats" data-i18n-aria="stats_label">
+      <div class="stat"><span class="stat-num" id="statTotal">0</span><span class="stat-label" data-i18n="stat_total">Total</span></div>
+      <div class="stat"><span class="stat-num" id="statPending">0</span><span class="stat-label" data-i18n="stat_pending">Pending</span></div>
+      <div class="stat"><span class="stat-num" id="statDone">0</span><span class="stat-label" data-i18n="stat_done">Completed</span></div>
+      <div class="stat"><span class="stat-num" id="statOverdue">0</span><span class="stat-label" data-i18n="stat_overdue">Overdue</span></div>
+    </section>
+    <div class="progress-wrap">
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress" aria-labelledby="progressLabel">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <p class="progress-label" id="progressLabel"></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Add task -->
+    <section class="card" aria-labelledby="newTaskHeading">
+      <h2 class="card-title" id="newTaskHeading" data-i18n="new_task">Add a new task</h2>
+      <form id="addForm" novalidate>
+        <div class="field">
+          <label for="titleInput" data-i18n="f_title">Task</label>
+          <input type="text" id="titleInput" name="title" maxlength="120" autocomplete="off" required data-i18n-ph="ph_title" aria-describedby="err-add-title" />
+          <p class="field-error" id="err-add-title" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span>
+          </p>
+        </div>
+        <div class="field">
+          <label for="notesInput" data-i18n="f_notes">Notes</label>
+          <textarea id="notesInput" name="notes" rows="2" maxlength="2000" data-i18n-ph="ph_notes"></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="priorityInput" data-i18n="f_priority">Priority</label>
+            <select id="priorityInput" name="priority" required aria-describedby="err-add-priority">
+              <option value="" data-i18n="ph_priority" disabled selected>Select priority</option>
+              <option value="low" data-i18n="p_low">Low</option>
+              <option value="medium" data-i18n="p_medium">Medium</option>
+              <option value="high" data-i18n="p_high">High</option>
+            </select>
+            <p class="field-error" id="err-add-priority" hidden>
+              <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span>
+            </p>
+          </div>
+          <div class="field">
+            <label for="dueInput" data-i18n="f_due">Due date</label>
+            <input type="date" id="dueInput" name="due" required aria-describedby="err-add-due" />
+            <p class="field-error" id="err-add-due" hidden>
+              <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span>
+            </p>
+          </div>
+          <div class="field">
+            <label for="categoryInput" data-i18n="f_category">Category</label>
+            <select id="categoryInput" name="category" required aria-describedby="err-add-category">
+              <option value="" data-i18n="ph_category" disabled selected>Select category</option>
+              <option value="work" data-i18n="c_work">Work</option>
+              <option value="home" data-i18n="c_home">Home</option>
+              <option value="personal" data-i18n="c_personal">Personal</option>
+              <option value="others" data-i18n="c_others">Others</option>
+            </select>
+            <p class="field-error" id="err-add-category" hidden>
+              <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span>
+            </p>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+          <span data-i18n="add">Add task</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Tasks -->
+    <section class="card list-card" aria-labelledby="tasksHeading">
+      <h2 class="card-title" id="tasksHeading" data-i18n="your_tasks">Your tasks</h2>
+
+      <div class="tabs" role="group" aria-labelledby="tasksHeading">
+        <button type="button" class="tab active" data-filter="all" aria-pressed="true"><span data-i18n="filter_all">All</span> <span class="count" id="countAll">0</span></button>
+        <button type="button" class="tab" data-filter="pending" aria-pressed="false"><span data-i18n="stat_pending">Pending</span> <span class="count" id="countPending">0</span></button>
+        <button type="button" class="tab" data-filter="completed" aria-pressed="false"><span data-i18n="stat_done">Completed</span> <span class="count" id="countDone">0</span></button>
+      </div>
+
+      <!-- Compact search / category / sort row -->
+      <div class="toolbar">
+        <div class="tb tb-search">
+          <label for="searchInput" class="sr-only" data-i18n="f_search">Search</label>
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" id="searchInput" class="compact" data-i18n-ph="ph_search" />
+        </div>
+        <div class="tb tb-select">
+          <label for="categoryFilter" class="sr-only" data-i18n="f_category">Category</label>
+          <svg class="icon" aria-hidden="true"><use href="#i-tag"/></svg>
+          <select id="categoryFilter" class="compact" data-i18n-title="f_category"></select>
+        </div>
+        <div class="tb tb-select">
+          <label for="sortSelect" class="sr-only" data-i18n="f_sort">Sort by</label>
+          <svg class="icon" aria-hidden="true"><use href="#i-sort"/></svg>
+          <select id="sortSelect" class="compact" data-i18n-title="f_sort">
+            <option value="manual" data-i18n="s_manual">My order</option>
+            <option value="due" data-i18n="f_due">Due date</option>
+            <option value="priority" data-i18n="f_priority">Priority</option>
+            <option value="newest" data-i18n="s_newest">Newest first</option>
+            <option value="oldest" data-i18n="s_oldest">Oldest first</option>
+            <option value="alpha" data-i18n="s_alpha">Alphabetical</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint" id="sortHint" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="sort_hint"></span>
+      </p>
+    </section>
+
+    <ul class="task-list" id="taskList" data-i18n-aria="your_tasks"></ul>
+
+    <div class="card empty" id="emptyState" hidden>
+      <svg class="empty-art" viewBox="0 0 120 100" aria-hidden="true">
+        <circle cx="56" cy="52" r="34" class="ea-globe"/>
+        <ellipse cx="56" cy="52" rx="15" ry="34" class="ea-line"/>
+        <path d="M22 52h68M26 36h60M26 68h60" class="ea-line"/>
+        <circle cx="88" cy="78" r="14" class="ea-badge"/>
+        <path d="M81.5 78.5l4.5 4.5 8-8.5" class="ea-tick"/>
+      </svg>
+      <p class="empty-msg" id="emptyMsg"></p>
+      <button type="button" class="btn btn-secondary" id="clearFiltersBtn" hidden data-i18n="clear_filters">Clear filters</button>
+    </div>
+  </main>
+
+  <!-- Task actions menu (shared by all task cards) -->
+  <div class="task-menu" id="taskMenu" role="menu" data-i18n-aria="more_actions" hidden>
+    <button type="button" role="menuitem" tabindex="-1" data-cmd="edit"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span data-i18n="edit">Edit</span></button>
+    <button type="button" role="menuitem" tabindex="-1" data-cmd="up"><svg class="icon" aria-hidden="true"><use href="#i-up"/></svg><span data-i18n="move_up">Move up</span></button>
+    <button type="button" role="menuitem" tabindex="-1" data-cmd="down"><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg><span data-i18n="move_down">Move down</span></button>
+    <div class="menu-sep" role="separator"></div>
+    <button type="button" role="menuitem" tabindex="-1" data-cmd="delete" class="danger"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg><span data-i18n="delete">Delete</span></button>
+  </div>
+
+  <!-- Toast message (success / error / undo) -->
+  <div class="toast" id="toast" hidden>
+    <svg class="icon toast-icon" aria-hidden="true"><use id="toastIcon" href="#i-check-circle"/></svg>
+    <span class="toast-msg" id="toastMsg" role="status" aria-live="polite"></span>
+    <button type="button" class="toast-undo" id="toastUndo" hidden data-i18n="undo">Undo</button>
+    <button type="button" class="toast-close" id="toastClose" data-i18n-aria="dismiss">
+      <svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>
+    </button>
+  </div>
+
+  <!-- Confirmation dialog -->
+  <dialog class="dialog" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <form method="dialog">
+      <h2 id="confirmTitle"></h2>
+      <p id="confirmText"></p>
+      <div class="dialog-actions">
+        <button type="submit" value="cancel" class="btn btn-secondary" data-i18n="cancel">Cancel</button>
+        <button type="submit" value="ok" class="btn btn-primary" id="confirmOk"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
