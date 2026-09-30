@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  const { LANGUAGES, STRINGS } = window.GT_I18N;
+  const { LANGUAGES, STRINGS, SAMPLE_TASKS } = window.GT_I18N;
   const STORAGE_KEY = 'globalTodo.tasks';
   const THEME_KEY = 'globalTodo.theme';
   const LANG_KEY = 'globalTodo.lang';
@@ -67,10 +67,13 @@
     return Date.now().toString(36) + Math.random().toString(36).slice(2);
   }
 
-  function todayStr() {
+  // Local date as YYYY-MM-DD, optionally shifted by a number of days.
+  function dateStr(offsetDays) {
     const d = new Date();
+    d.setDate(d.getDate() + (offsetDays || 0));
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
+  const todayStr = () => dateStr(0);
 
   function formatDue(str) {
     const [y, m, d] = str.split('-').map(Number);
@@ -140,6 +143,7 @@
       category: normalizeCategory(raw.category),
       completed: Boolean(raw.completed),
       createdAt: Number(raw.createdAt) || Date.now(),
+      sample: raw.sample === true, // marks tasks added by "Load sample data"
     };
   }
 
@@ -260,6 +264,7 @@
     list.replaceChildren(...visible.map((x) => renderTask(x, canReorder)));
     renderEmptyState(visible.length);
     $('sortHint').hidden = canReorder || visible.length < 2;
+    $('sampleBanner').hidden = !tasks.some((x) => x.sample);
     renderStats();
   }
 
@@ -276,6 +281,7 @@
     }
     $('emptyMsg').textContent = t(key + '_msg');
     $('clearFiltersBtn').hidden = key !== 'nomatch';
+    $('emptySampleBtn').hidden = key !== 'empty';
   }
 
   function renderTask(task, canReorder) {
@@ -882,6 +888,61 @@
   $('searchInput').addEventListener('input', (e) => { view.search = e.target.value; render(); });
   $('categoryFilter').addEventListener('change', (e) => { view.category = e.target.value; render(); });
   $('sortSelect').addEventListener('change', (e) => { view.sort = e.target.value; render(); });
+
+  // ---------- Sample data ----------
+  // One entry per sample task, in the order of SAMPLE_TASKS in i18n.js.
+  // due: days from today (null = no due date). The overdue task is exempt from the no-past-dates rule.
+  const SAMPLE_PLAN = [
+    { priority: 'high', category: 'work', due: 1 },                       // slides (tomorrow)
+    { priority: 'high', category: 'work', due: -2 },                      // client reply (overdue)
+    { priority: 'medium', category: 'personal', due: 7 },                 // dentist (next week)
+    { priority: 'medium', category: 'home', due: 0 },                     // groceries (today)
+    { priority: 'high', category: 'home', due: 1, completed: true },      // electricity bill
+    { priority: 'low', category: 'personal', due: null },                 // run
+    { priority: 'medium', category: 'others', due: 7 },                   // passport (next week)
+    { priority: 'low', category: 'home', due: null, completed: true },    // plants
+    { priority: 'low', category: 'others', due: null },                   // weekend trip
+    { priority: 'medium', category: 'work', due: 0, completed: true },    // monthly report
+  ];
+
+  // Adds the sample tasks in the current language after the user's own tasks.
+  // Loading again replaces the previous sample set instead of duplicating it; the user's tasks are never touched.
+  function loadSampleData() {
+    const texts = SAMPLE_TASKS[lang] || SAMPLE_TASKS.en;
+    const now = Date.now();
+    const samples = SAMPLE_PLAN.map((plan, i) => ({
+      id: uid(),
+      title: texts[i][0],
+      notes: texts[i][1],
+      priority: plan.priority,
+      due: plan.due === null ? '' : dateStr(plan.due),
+      category: plan.category,
+      completed: Boolean(plan.completed),
+      createdAt: now - (SAMPLE_PLAN.length - i) * 60000,
+      sample: true,
+    }));
+    tasks = tasks.filter((x) => !x.sample).concat(samples);
+    save();
+    // Reset search and filters so every sample task is visible.
+    view.editingId = null;
+    view.search = '';
+    view.category = '';
+    $('searchInput').value = '';
+    renderCategoryFilter();
+    setFilter('all');
+    showToast(t('ok_sample_loaded', { n: num(samples.length) }));
+  }
+
+  // Removes only the sample tasks (with Undo); the user's own tasks stay.
+  function clearSampleData() {
+    if (tasks.some((x) => x.sample && x.id === view.editingId)) view.editingId = null;
+    withUndo(t('ok_sample_cleared'), () => { tasks = tasks.filter((x) => !x.sample); });
+    (list.querySelector('.more-btn') || titleInput).focus();
+  }
+
+  $('sampleBtn').addEventListener('click', () => { closeToolsMenu(); loadSampleData(); });
+  $('emptySampleBtn').addEventListener('click', loadSampleData);
+  $('clearSampleBtn').addEventListener('click', clearSampleData);
 
   $('clearFiltersBtn').addEventListener('click', () => {
     view.search = '';

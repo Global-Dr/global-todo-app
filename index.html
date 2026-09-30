@@ -54,6 +54,7 @@
       <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 7.5v5.5M12 16.5v.01"/></symbol>
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 11v5.5M12 7.5v.01"/></symbol>
       <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M10 3l1.8 4.9L16.7 9.7l-4.9 1.8L10 16.4l-1.8-4.9L3.3 9.7l4.9-1.8zM18 14l.9 2.3 2.3.9-2.3.9L18 20.4l-.9-2.3-2.3-.9 2.3-.9z"/></symbol>
     </defs>
   </svg>
 
@@ -107,6 +108,10 @@
           <button type="button" class="hbtn tool has-tip" id="importBtn" data-i18n-tip="import_tip">
             <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
             <span class="tool-text"><span class="tool-label" data-i18n="import">Import backup</span><span class="tool-desc" data-i18n="import_tip"></span></span>
+          </button>
+          <button type="button" class="hbtn tool has-tip" id="sampleBtn" data-i18n-tip="sample_load_tip">
+            <svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg>
+            <span class="tool-text"><span class="tool-label" data-i18n="sample_load">Load sample data</span><span class="tool-desc" data-i18n="sample_load_tip"></span></span>
           </button>
         </div>
         <input type="file" id="importInput" accept="application/json,.json" hidden />
@@ -225,6 +230,13 @@
       </p>
     </section>
 
+    <!-- Shown while sample tasks are in the list -->
+    <div class="sample-banner" id="sampleBanner" hidden>
+      <svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg>
+      <span class="sample-banner-text" data-i18n="sample_banner">You're viewing sample data.</span>
+      <button type="button" class="btn btn-secondary btn-small" id="clearSampleBtn" data-i18n="sample_clear">Clear sample data</button>
+    </div>
+
     <ul class="task-list" id="taskList" data-i18n-aria="your_tasks"></ul>
 
     <div class="card empty" id="emptyState" hidden>
@@ -237,6 +249,9 @@
       </svg>
       <p class="empty-msg" id="emptyMsg"></p>
       <button type="button" class="btn btn-secondary" id="clearFiltersBtn" hidden data-i18n="clear_filters">Clear filters</button>
+      <button type="button" class="btn btn-secondary" id="emptySampleBtn" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg><span data-i18n="sample_load">Load sample data</span>
+      </button>
     </div>
   </main>
 

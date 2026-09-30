@@ -17,6 +17,7 @@ A friendly, multilingual to-do list built with **plain HTML, CSS and JavaScript*
 - **Stats:** total, pending, completed and overdue counts, plus a progress bar.
 - **Dark mode:** follows your system setting the first time, then remembers your choice.
 - **Backup:** export to a JSON file, and import one after a confirmation, with Undo.
+- **Sample data:** "Load sample data" (in the empty state and in Settings) adds 10 example tasks in the current language, covering every priority, category and due-date state. They're added alongside your own tasks, never replacing them. A banner then offers "Clear sample data", which removes only the samples.
 - **8 languages:** English, Français, Español, 简体中文, Русский, Português, Deutsch and العربية. Each has an inline SVG flag. Arabic switches the layout to right-to-left. The app detects your browser language on the first visit and remembers your choice after that.
 - **Mobile-friendly:** tap targets are at least 44px, and on phones the header tools are grouped in a **Settings** menu.
 
